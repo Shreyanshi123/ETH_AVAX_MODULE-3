@@ -155,14 +155,34 @@ contract PokemonToken {
         require(ownerOf(tokenId) == msg.sender, "You are not the owner");
         require(to != address(0), "Invalid recipient address");
 
-        _transfer(msg.sender, to, tokenId);
+       address from = msg.sender;
+
+    require(ownerOf(tokenId) == from, "Token not owned by sender");
+
+    _tokenOwner[tokenId] = to;
+    _tokenApprovals[tokenId] = address(0);
+
+    balanceOf[from] = balanceOf[from].sub(1);
+    balanceOf[to] = balanceOf[to].add(1);
+
+    emit Transfer(from, to, tokenId);
     }
 
     function transferFrom(address from, address to, uint256 tokenId) public whenNotPaused {
         require(isApprovedOrOwner(msg.sender, tokenId), "You are not approved to transfer this token");
         require(to != address(0), "Invalid recipient address");
 
-        _transfer(from, to, tokenId);
+        require(ownerOf(tokenId) == from, "Token not owned by sender");
+
+    _tokenOwner[tokenId] = to;
+    _tokenApprovals[tokenId] = address(0);
+
+    balanceOf[from] = balanceOf[from].sub(1);
+    balanceOf[to] = balanceOf[to].add(1);
+
+    emit Transfer(from, to, tokenId);
+
+       
     }
 
     function approve(address to, uint256 tokenId) public whenNotPaused {
@@ -180,18 +200,5 @@ contract PokemonToken {
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function _transfer(address from, address to, uint256 tokenId) internal {
-        require(ownerOf(tokenId) == from, "Token not owned by sender");
-        require(to != address(0), "Invalid recipient address");
-
-        _tokenOwner[tokenId] = to;
-        _tokenApprovals[tokenId] = address(0);
-
-        balanceOf[from] = balanceOf[from].sub(1);
-        balanceOf[to] = balanceOf[to].add(1);
-
-        emit Transfer(from, to, tokenId);
-    }
+  
 }
-
-
